@@ -33,7 +33,7 @@ output application/json
 {
 	base_experience: payload.base_experience,
 	name: payload.name,
-	ability: payload.abilities.ability.name
+	ability: payload.abilities[0].ability.name
 }]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
