@@ -15,6 +15,7 @@ http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/
 		<http:request-connection host="localhost" port="8082" >
 		</http:request-connection>
 	</http:request-config>
+	<configuration doc:name="Configuration" doc:id="29ab4564-4b68-420d-8e1c-2f9597268d21" defaultErrorHandler-ref="errorGlobalMioError_Handler" />
 	<flow name="procesoFlow" doc:id="cb9b5aad-ba0d-4734-a0e3-cb227fc489cd" >
 		<http:listener doc:name="Listener" doc:id="cad2b8e8-056a-454a-aea9-b80b90cbb2c5" config-ref="HTTP_Listener_config" path="/exp/{idPokeApi}"/>
 		<http:request method="GET" doc:name="Request" doc:id="cd1eb1a6-b7ef-4909-a0ec-2542ca4a0396" config-ref="HTTP_Request_configuration" path="/obtenerPokemon/{id}">
