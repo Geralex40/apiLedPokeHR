@@ -24,12 +24,16 @@ http://www.mulesoft.org/schema/mule/validation http://www.mulesoft.org/schema/mu
 			</http:error-response>
 		</http:listener>
 		<logger level="INFO" doc:name="Logger" doc:id="2d9b5c4b-121d-4440-a675-22e5299ff059" message="#[payload]"/>
-		<validation:is-not-null doc:name="Is not null" doc:id="0d6baccb-bbd6-470c-abf1-952bbfa532ef" value="#[attributes.uriParams.idPokeApi]" message="PROCESO:"/>
+		<validation:is-not-null doc:name="Is not null" doc:id="0d6baccb-bbd6-470c-abf1-952bbfa532ef" value="#[attributes.uriParams.idPokeApi]" message="URI VACIOOO"/>
 		<logger level="INFO" doc:name="Logger" doc:id="84753a02-e2f5-4c94-a82e-659b79cfee0f" message="#[attributes.uriParams.idPokeApi]"/>
 		<choice doc:name="Choice" doc:id="7dcbc9aa-10ff-4887-a23d-7c35ac341917" >
-			<when expression='#[attributes.uriParams.idPokeApi == "25" or attributes.uriParams.idPokeApi == "pikachu"]'>
+			<when expression='#[attributes.uriParams.idPokeApi == "25" or attributes.uriParams.idPokeApi == "pikachu" or attributes.uriParams.idPokeApi == "PIKACHU"]'>
 				<logger level="INFO" doc:name="Logger" doc:id="3849d9d5-ce22-40bc-a9d3-6ad57015ff65" message="error de pikachu" />
 				<raise-error doc:name="Raise error" doc:id="ee5df116-480c-4a4e-8f3c-43254edbd6d6" type="BANEOS:PIKACHU" />
+			</when>
+			<when expression='#[attributes.uriParams.idPokeApi == " "]'>
+				<logger level="INFO" doc:name="Logger" doc:id="f305929b-7b43-4994-8298-e52a1d5abb3a" message="PROCESO: URI VACIO LUL"/>
+				<raise-error doc:name="Raise error" doc:id="41d53ccd-181a-472a-a8f6-07e46d7ba74c" type="PROCESO:URIVACIO"/>
 			</when>
 			<otherwise>
 				<logger level="INFO" doc:name="Logger" doc:id="9858a239-2727-44e9-b20a-a35e66e35826" message="no pikachu, to bien"/>
@@ -62,7 +66,21 @@ output application/json
 						<ee:set-payload><![CDATA[%dw 2.0
 output application/json
 ---
-"error banPikachu"]]></ee:set-payload>
+{
+"ERRORTYPE":"error banPikachu"
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</on-error-propagate>
+			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="3270ee43-40e9-4f57-9cb3-8fa094c788f1" type="PROCESO:URIVACIO">
+				<ee:transform doc:name="Transform Message" doc:id="874539bb-beda-4e88-94fb-3c0c41ae1c9f" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/JSON
+---
+{
+	"ERRORTYPE":"URIVACIO"
+}]]></ee:set-payload>
 					</ee:message>
 				</ee:transform>
 			</on-error-propagate>

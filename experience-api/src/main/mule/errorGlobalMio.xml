@@ -5,18 +5,6 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
 http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
 	<error-handler name="errorGlobalMioError_Handler" doc:id="88a9147c-83bc-488b-9c54-6ac538fdc991" >
-		<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="0416663d-de80-47e4-a80b-7178552189dd" type="ANY">
-			<ee:transform doc:name="Transform Message" doc:id="54e47664-b5bb-42b5-a6eb-cd9d0669e584" >
-				<ee:message >
-					<ee:set-payload ><![CDATA[%dw 2.0
-output application/JSON
----
-{
-	"payload":payload
-}]]></ee:set-payload>
-				</ee:message>
-			</ee:transform>
-		</on-error-propagate>
 		<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="4d426584-633d-4757-ac49-76290921604a" type="BANEOS:PIKACHU2">
 			<ee:transform doc:name="Transform Message" doc:id="eededbc6-1edb-4fad-9966-aff5f87ae455" >
 				<ee:message >
@@ -25,6 +13,17 @@ output application/JSON
 ---
 
 "nO SE PERMITE piKACHU. Prueba de rise error BANEos:pikachu"]]></ee:set-payload>
+				</ee:message>
+			</ee:transform>
+		</on-error-propagate>
+		<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="a2e66cf8-21ce-45b6-aa74-039509ea159e" type="PROCESO:URIVACIO2">
+			<logger level="INFO" doc:name="Logger" doc:id="a075e5d3-9a05-4737-9df6-150ecb301691" message="SE LANZO ERROR URI VACIO"/>
+			<ee:transform doc:name="Transform Message" doc:id="6f4c17a1-511e-4b18-add8-9e197cf5137a" >
+				<ee:message >
+					<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{"OCURRIO UN ERROR":"pokemon vacio"}]]></ee:set-payload>
 				</ee:message>
 			</ee:transform>
 		</on-error-propagate>
