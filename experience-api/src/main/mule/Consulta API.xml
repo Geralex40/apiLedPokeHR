@@ -10,7 +10,7 @@ http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/htt
 	<http:request-config name="HTTP_Request_configuration" doc:name="HTTP Request configuration" doc:id="e49a0729-5543-49d0-aaaa-04deb7a0c9fa" basePath="/proceso">
 		<http:request-connection host="localhost" port="8098" />
 	</http:request-config>
-	<configuration doc:name="Configuration" doc:id="9ea8abed-c925-493d-894e-46fd81252265" defaultErrorHandler-ref="errorGlobalMioError_Handler" />
+	<configuration doc:name="Configuration" doc:id="75f96c25-8a3e-4a2f-8285-78c73925954d" defaultErrorHandler-ref="errorGlobalMioError_Handler" />
 	<flow name="Consulta_APIFlow" doc:id="fae23b23-896c-42a6-bcfa-4172fb312c00" >
 		<http:listener doc:name="Listener" doc:id="0c6abc1d-d81d-4482-98b6-6a7c22fd727a" config-ref="cfg_http_postman" path="obtenerPoke/{id}">
 			<http:response >
@@ -21,12 +21,30 @@ http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/htt
 			</http:error-response>
 		</http:listener>
 		<set-variable value="#[attributes.uriParams.id]" doc:name="Set Variable" doc:id="16d1d2a9-7218-4405-b733-ba79362eb77a" variableName="idPokemon"/>
-		<http:request method="GET" doc:name="Request" doc:id="ce213ed5-539f-4431-b55c-6e055e26b54e" path="/exp/{id}" config-ref="HTTP_Request_configuration">
-			<http:uri-params ><![CDATA[#[output application/java
+		<try doc:name="Try" doc:id="bad7905e-66cd-4447-990c-69f7a71c774b" >
+			<http:request method="GET" doc:name="Request" doc:id="f1d3dc1f-1498-4c2f-a76c-0bb6892d94e4" config-ref="HTTP_Request_configuration" path="/exp/{id}">
+			<http:uri-params><![CDATA[#[output application/java
 ---
 {
-	id : vars.idPokemon
+	id : attributes.uriParams.id
 }]]]></http:uri-params>
 		</http:request>
+			<error-handler >
+				<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="1f0eb081-fc67-417f-ad4d-8f8c0a61f1c0" >
+					<logger level="INFO" doc:name="Logger" doc:id="a2f23aaa-c673-460c-8bf3-5e8f3511bbc2" message='#[error.errorMessage.attributes.reasonPhrase]'/>
+					<set-variable value="#[error.errorMessage.attributes.reasonPhrase]" doc:name="Set Variable" doc:id="39404a90-8d52-4509-9948-124efc6c1d2c" variableName="errorReasonProceso"/>
+				</on-error-continue>
+			</error-handler>
+		</try>
+		<logger level="INFO" doc:name="Logger" doc:id="69e4be98-8a30-4e0e-b90a-5f48ffdad211" message="#[payload]"/>
+		<choice doc:name="Choice" doc:id="c562178a-a326-49e7-a852-7b1f7b48eb97" >
+			<when expression='#[vars.errorReasonProceso=="ban pika porfavor"]'>
+				<logger level="INFO" doc:name="Logger" doc:id="a4ab1626-49ac-48a7-8a5e-2c1f3c582881" message="el proceso tiene un error"/>
+				<raise-error doc:name="Raise error" doc:id="8e381716-f9dc-4e03-8462-a414d3415e83" type="BANEOS:PIKACHU2"/>
+			</when>
+			<otherwise >
+				<logger level="INFO" doc:name="Logger" doc:id="65a620fe-e18b-456d-a319-528d11e8c5fe" message="to bien"/>
+			</otherwise>
+		</choice>
 	</flow>
 </mule>

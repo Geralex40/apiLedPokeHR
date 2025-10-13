@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http"
-	xmlns="http://www.mulesoft.org/schema/mule/core"
-	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+<mule xmlns:validation="http://www.mulesoft.org/schema/mule/validation" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
 http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
-http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/validation http://www.mulesoft.org/schema/mule/validation/current/mule-validation.xsd">
 	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="e91e25c0-5a33-488f-be27-f9f42382c04f" basePath="/proceso">
 		<http:listener-connection host="0.0.0.0" port="8098" />
 	</http:listener-config>
@@ -17,15 +18,30 @@ http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/
 	</http:request-config>
 	<configuration doc:name="Configuration" doc:id="29ab4564-4b68-420d-8e1c-2f9597268d21" defaultErrorHandler-ref="errorGlobalMioError_Handler" />
 	<flow name="procesoFlow" doc:id="cb9b5aad-ba0d-4734-a0e3-cb227fc489cd" >
-		<http:listener doc:name="Listener" doc:id="cad2b8e8-056a-454a-aea9-b80b90cbb2c5" config-ref="HTTP_Listener_config" path="/exp/{idPokeApi}"/>
+		<http:listener doc:name="Listener" doc:id="cad2b8e8-056a-454a-aea9-b80b90cbb2c5" config-ref="HTTP_Listener_config" path="/exp/{idPokeApi}">
+			<http:error-response reasonPhrase="ban pika porfavor" statusCode="477">
+				<http:body ><![CDATA[#[payload]]]></http:body>
+			</http:error-response>
+		</http:listener>
+		<logger level="INFO" doc:name="Logger" doc:id="2d9b5c4b-121d-4440-a675-22e5299ff059" message="#[payload]"/>
+		<validation:is-not-null doc:name="Is not null" doc:id="0d6baccb-bbd6-470c-abf1-952bbfa532ef" value="#[attributes.uriParams.idPokeApi]" message="PROCESO:"/>
+		<logger level="INFO" doc:name="Logger" doc:id="84753a02-e2f5-4c94-a82e-659b79cfee0f" message="#[attributes.uriParams.idPokeApi]"/>
+		<choice doc:name="Choice" doc:id="7dcbc9aa-10ff-4887-a23d-7c35ac341917" >
+			<when expression='#[attributes.uriParams.idPokeApi == "25" or attributes.uriParams.idPokeApi == "pikachu"]'>
+				<logger level="INFO" doc:name="Logger" doc:id="3849d9d5-ce22-40bc-a9d3-6ad57015ff65" message="error de pikachu" />
+				<raise-error doc:name="Raise error" doc:id="ee5df116-480c-4a4e-8f3c-43254edbd6d6" type="BANEOS:PIKACHU" />
+			</when>
+			<otherwise>
+				<logger level="INFO" doc:name="Logger" doc:id="9858a239-2727-44e9-b20a-a35e66e35826" message="no pikachu, to bien"/>
+			</otherwise>
+		</choice>
 		<http:request method="GET" doc:name="Request" doc:id="cd1eb1a6-b7ef-4909-a0ec-2542ca4a0396" config-ref="HTTP_Request_configuration" path="/obtenerPokemon/{id}">
-			<http:uri-params ><![CDATA[#[output application/java
+			<http:uri-params><![CDATA[#[output application/java
 ---
 {
 	id : attributes.uriParams.idPokeApi
 }]]]></http:uri-params>
 		</http:request>
-		<logger level="INFO" doc:name="Logger" doc:id="2d9b5c4b-121d-4440-a675-22e5299ff059" message="#[payload]"/>
 		<ee:transform doc:name="Transform Message" doc:id="f6e09986-e4ae-4b4b-a3e2-49b758f238e7" >
 			<ee:message >
 				<ee:set-payload ><![CDATA[%dw 2.0
@@ -39,5 +55,17 @@ output application/json
 			</ee:message>
 		</ee:transform>
 		<http:request method="POST" doc:name="Request" doc:id="6cd0df1f-4e86-4db7-80f2-d3940a7038c6" config-ref="HTTP_Request_configuration1" path="/insert"/>
+		<error-handler >
+			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="830badec-aa76-4633-aa10-553fdbf45d0a" type="BANEOS:PIKACHU">
+				<ee:transform doc:name="Transform Message" doc:id="3e7bbe12-2471-49b2-89c6-a83964351b93">
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+"error banPikachu"]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</on-error-propagate>
+		</error-handler>
 	</flow>
 </mule>

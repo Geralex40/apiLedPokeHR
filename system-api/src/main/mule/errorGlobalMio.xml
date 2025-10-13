@@ -5,13 +5,16 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
 http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
 	<error-handler name="errorGlobalMioError_Handler" doc:id="88a9147c-83bc-488b-9c54-6ac538fdc991" >
-		<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="0416663d-de80-47e4-a80b-7178552189dd" >
+		<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="0416663d-de80-47e4-a80b-7178552189dd" type="ANY">
 			<ee:transform doc:name="Transform Message" doc:id="54e47664-b5bb-42b5-a6eb-cd9d0669e584" >
 				<ee:message >
 					<ee:set-payload ><![CDATA[%dw 2.0
-output application/java
+output application/json
 ---
-"Ocurrio un error, culpa de Anapaw"]]></ee:set-payload>
+{
+	mensaje: "Ocurrio un error, culpa de Anapaw"	
+}
+]]></ee:set-payload>
 				</ee:message>
 			</ee:transform>
 		</on-error-propagate>
