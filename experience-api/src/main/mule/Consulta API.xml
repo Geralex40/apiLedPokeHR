@@ -39,13 +39,19 @@ http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/htt
 		</try>
 		<logger level="INFO" doc:name="Logger" doc:id="69e4be98-8a30-4e0e-b90a-5f48ffdad211" message="#[payload]"/>
 		<choice doc:name="Choice" doc:id="c562178a-a326-49e7-a852-7b1f7b48eb97" >
-			<when expression='#[vars.errorReasonProceso=="error banPikachu"]'>
+			<when expression='#[vars.errorReasonProceso=="error banPikachu" or vars.errorReasonProceso=="noDitto"]'>
 				<logger level="INFO" doc:name="Logger" doc:id="a4ab1626-49ac-48a7-8a5e-2c1f3c582881" message="el proceso tiene un error"/>
-				<raise-error doc:name="Raise error" doc:id="8e381716-f9dc-4e03-8462-a414d3415e83" type="BANEOS:PIKACHU2"/>
+				<raise-error doc:name="Raise error" doc:id="8e381716-f9dc-4e03-8462-a414d3415e83" type="BANEOS:POKEMON"/>
 			</when>
-			<when expression='vars.errorReasonProceso=="URIVACIO"'>
+			<when expression='#[vars.errorReasonProceso=="URIVACIO"]'>
 				<logger level="INFO" doc:name="Logger" doc:id="05ffed17-00cc-446a-94b9-3745441faabd" message="SE DETECTO URI VACIA"/>
 				<raise-error doc:name="Raise error" doc:id="e96d36c7-7f9f-4c0d-a5e7-614e4e50dd2c" type="PROCESO:URIVACIO2"/>
+			</when>
+			<when expression='#[vars.errorReasonProceso=="Error en la capa de sistema"]'>
+				<raise-error doc:name="Raise error" doc:id="6110db72-2a74-490f-b4d9-11524d438a39" type="SYSTEMA:ERROR"/>
+			</when>
+			<when expression='#[vars.errorReasonProceso=="Error EN SISTEMA,INSERT"]'>
+				<raise-error doc:name="Raise error" doc:id="4680012a-463b-4318-8e2c-cd62ae6ce4d8" type="SYSTEMA:ERRORDB"/>
 			</when>
 			<otherwise >
 				<logger level="INFO" doc:name="Logger" doc:id="65a620fe-e18b-456d-a319-528d11e8c5fe" message="to bien"/>

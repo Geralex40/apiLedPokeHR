@@ -35,6 +35,10 @@ http://www.mulesoft.org/schema/mule/validation http://www.mulesoft.org/schema/mu
 				<logger level="INFO" doc:name="Logger" doc:id="f305929b-7b43-4994-8298-e52a1d5abb3a" message="PROCESO: URI VACIO LUL"/>
 				<raise-error doc:name="Raise error" doc:id="41d53ccd-181a-472a-a8f6-07e46d7ba74c" type="PROCESO:URIVACIO"/>
 			</when>
+			<when expression='#[attributes.uriParams.idPokeApi == "DITTO" or attributes.uriParams.idPokeApi == "ditto" or attributes.uriParams.idPokeApi == "132"]'>
+				<logger level="INFO" doc:name="Logger" doc:id="76c5a12e-9ed6-456b-ad28-291e5da2147b" message="se detecto ditto"/>
+				<raise-error doc:name="Raise error" doc:id="c87d2b76-c3a0-4791-9394-791c875587bb" type="BANEOS:DITTO"/>
+			</when>
 			<otherwise>
 				<logger level="INFO" doc:name="Logger" doc:id="9858a239-2727-44e9-b20a-a35e66e35826" message="no pikachu, to bien"/>
 			</otherwise>
@@ -80,6 +84,43 @@ output application/JSON
 ---
 {
 	"ERRORTYPE":"URIVACIO"
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</on-error-propagate>
+			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="50258f2b-6b1b-4e88-94f3-0a54470c785e" type="BANEOS:DITTO">
+				<ee:transform doc:name="Transform Message" doc:id="4c00206f-811c-446d-a81e-c77ebc321e9d" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/JSON
+---
+{
+"ERRORTYPE":"noDitto"
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</on-error-propagate>
+			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="78219a02-ff2d-4ebe-87d8-e8faa9cc2309" type="HTTP:NOT_FOUND">
+				<logger level="INFO" doc:name="Logger" doc:id="a33d687b-8a12-4780-b9fd-cd1cfdc60a20" message="NO ENCONTRO EL POKEMON, ERROR"/>
+				<ee:transform doc:name="Transform Message" doc:id="afb45112-68de-4b23-9387-efc83206d11d" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+"ERRORTYPE":"Error en la capa de sistema"
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</on-error-propagate>
+			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="616eab94-3e3a-457f-bb0c-6d9393a292ba" type="HTTP:INTERNAL_SERVER_ERROR">
+				<ee:transform doc:name="Transform Message" doc:id="37e6bac2-264d-42e4-9b1a-97dbd25471a9" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/JSON
+---
+{
+"ERRORTYPE":"Error EN SISTEMA,INSERT"
 }]]></ee:set-payload>
 					</ee:message>
 				</ee:transform>
