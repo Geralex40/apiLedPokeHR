@@ -23,8 +23,25 @@ http://www.mulesoft.org/schema/mule/validation http://www.mulesoft.org/schema/mu
 				<http:body ><![CDATA[#[payload]]]></http:body>
 			</http:error-response>
 		</http:listener>
-		<logger level="INFO" doc:name="Logger" doc:id="2d9b5c4b-121d-4440-a675-22e5299ff059" message="#[payload]"/>
-		<validation:is-not-null doc:name="Is not null" doc:id="0d6baccb-bbd6-470c-abf1-952bbfa532ef" value="#[attributes.uriParams.idPokeApi]" message="URI VACIOOO"/>
+		<ee:transform doc:name="Transform Message" doc:id="892b32ea-79e1-40f7-8be5-0c61e031fa31" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+{
+}]]></ee:set-payload>
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="encabezado" ><![CDATA[%dw 2.0
+output application/java
+---
+{
+	
+}]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="2d9b5c4b-121d-4440-a675-22e5299ff059" message='#[output application/json&#10;---&#10;{&#10;	mensaje: "Pokemon recibido de la capa de experiencia.",&#10;	contenido: payload&#10;}]'/>
+		<validation:is-not-null doc:name="Is not null" doc:id="0d6baccb-bbd6-470c-abf1-952bbfa532ef" value="#[attributes.uriParams.idPokeApi]" message="#[URI VACIOOO]"/>
 		<logger level="INFO" doc:name="Logger" doc:id="84753a02-e2f5-4c94-a82e-659b79cfee0f" message="#[attributes.uriParams.idPokeApi]"/>
 		<choice doc:name="Choice" doc:id="7dcbc9aa-10ff-4887-a23d-7c35ac341917" >
 			<when expression='#[attributes.uriParams.idPokeApi == "25" or attributes.uriParams.idPokeApi == "pikachu" or attributes.uriParams.idPokeApi == "PIKACHU"]'>
@@ -63,6 +80,7 @@ output application/json
 			</ee:message>
 		</ee:transform>
 		<http:request method="POST" doc:name="Request" doc:id="6cd0df1f-4e86-4db7-80f2-d3940a7038c6" config-ref="HTTP_Request_configuration1" path="/insert"/>
+		<logger level="INFO" doc:name="Logger" doc:id="cb1a0bfe-e792-432b-ac4e-71121674c37e" message='#[output application/json&#10;---&#10;{&#10;	mensaje: "respuesta de system",&#10;	contenido: payload&#10;}]'/>
 		<error-handler >
 			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="830badec-aa76-4633-aa10-553fdbf45d0a" type="BANEOS:PIKACHU">
 				<ee:transform doc:name="Transform Message" doc:id="3e7bbe12-2471-49b2-89c6-a83964351b93">
@@ -120,10 +138,12 @@ output application/json
 output application/JSON
 ---
 {
-"ERRORTYPE":"Error EN SISTEMA,INSERT"
+	mensaje: "Error",
+	contenido: payload
 }]]></ee:set-payload>
 					</ee:message>
 				</ee:transform>
+				<logger level="INFO" doc:name="Logger" doc:id="28f05b37-3240-46ea-ba48-c1537b3f361c" message="#[payload]"/>
 			</on-error-propagate>
 		</error-handler>
 	</flow>

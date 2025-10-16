@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<mule xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core"
-	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
-http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
 	<http:listener-config name="cfg_http_postman" doc:name="HTTP Listener config" doc:id="37dcb427-765a-4e61-8dfb-4332e55c836a" basePath="/">
 		<http:listener-connection host="0.0.0.0" port="8088" />
 	</http:listener-config>
@@ -14,48 +15,52 @@ http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/htt
 	<flow name="Consulta_APIFlow" doc:id="fae23b23-896c-42a6-bcfa-4172fb312c00" >
 		<http:listener doc:name="Listener" doc:id="0c6abc1d-d81d-4482-98b6-6a7c22fd727a" config-ref="cfg_http_postman" path="obtenerPoke/{id}">
 			<http:response >
-				<http:body ><![CDATA[#[output text/json --- "Pokemon Insertado Correctamente."]]]></http:body>
+				<http:body ><![CDATA[#[output application/json
+---
+{
+	encabezado: {
+		mensaje: payload.encabezado.mensaje,
+		operacion: payload.encabezado.operacion,
+		capa: vars.encabezado.capa
+	},
+	contenido: payload.contenido
+}]]]></http:body>
 			</http:response>
 			<http:error-response >
-				<http:body ><![CDATA[#[output text/json --- payload]]]></http:body>
+				<http:body ><![CDATA[#[output application/json
+---
+{
+	encabezado: {
+		mensaje: payload.encabezado.mensaje,
+		operacion: payload.encabezado.operacion,
+		capa: payload.encabezado.capa
+	},
+	contenido: payload.contenido
+}]]]></http:body>
 			</http:error-response>
 		</http:listener>
-		<set-variable value="#[attributes.uriParams.id]" doc:name="Set Variable" doc:id="16d1d2a9-7218-4405-b733-ba79362eb77a" variableName="idPokemon"/>
-		<try doc:name="Try" doc:id="bad7905e-66cd-4447-990c-69f7a71c774b" >
-			<http:request method="GET" doc:name="Request" doc:id="f1d3dc1f-1498-4c2f-a76c-0bb6892d94e4" config-ref="HTTP_Request_configuration" path="/exp/{id}">
+		<ee:transform doc:name="Transform Message" doc:id="5465b17e-e5e7-46a0-a3c6-fbf70cc56d10" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+{
+}]]></ee:set-payload>
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="encabezado.capa" ><![CDATA[%dw 2.0
+output application/java
+---
+"experiencia"]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger1" doc:id="b3334147-d019-4cb9-8cc6-caf99d6303c5" message='#[output application/json&#10;---&#10;{&#10;	mensaje: "Identificador de pokemón ingresado desde postman",&#10;	contenido: attributes.uriParams.id&#10;}]' />
+		<http:request method="GET" doc:name="Request" doc:id="f1d3dc1f-1498-4c2f-a76c-0bb6892d94e4" config-ref="HTTP_Request_configuration" path="/exp/{id}">
 			<http:uri-params><![CDATA[#[output application/java
 ---
 {
 	id : attributes.uriParams.id
 }]]]></http:uri-params>
 		</http:request>
-			<error-handler >
-				<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="1f0eb081-fc67-417f-ad4d-8f8c0a61f1c0" >
-					<logger level="INFO" doc:name="Logger" doc:id="7a9f0ca2-f5d0-4d09-9679-bf49abbcee06" message="A CONTINUACION, LO QUE NOS INTERESA DEL ERROR DE LA CAPA PROCESO"/>
-					<logger level="INFO" doc:name="Logger" doc:id="a2f23aaa-c673-460c-8bf3-5e8f3511bbc2" message='#[error.errorMessage.payload.ERRORTYPE]'/>
-					<set-variable value="#[error.errorMessage.payload.ERRORTYPE]" doc:name="Set Variable" doc:id="39404a90-8d52-4509-9948-124efc6c1d2c" variableName="errorReasonProceso"/>
-				</on-error-continue>
-			</error-handler>
-		</try>
-		<logger level="INFO" doc:name="Logger" doc:id="69e4be98-8a30-4e0e-b90a-5f48ffdad211" message="#[payload]"/>
-		<choice doc:name="Choice" doc:id="c562178a-a326-49e7-a852-7b1f7b48eb97" >
-			<when expression='#[vars.errorReasonProceso=="error banPikachu" or vars.errorReasonProceso=="noDitto"]'>
-				<logger level="INFO" doc:name="Logger" doc:id="a4ab1626-49ac-48a7-8a5e-2c1f3c582881" message="el proceso tiene un error"/>
-				<raise-error doc:name="Raise error" doc:id="8e381716-f9dc-4e03-8462-a414d3415e83" type="BANEOS:POKEMON"/>
-			</when>
-			<when expression='#[vars.errorReasonProceso=="URIVACIO"]'>
-				<logger level="INFO" doc:name="Logger" doc:id="05ffed17-00cc-446a-94b9-3745441faabd" message="SE DETECTO URI VACIA"/>
-				<raise-error doc:name="Raise error" doc:id="e96d36c7-7f9f-4c0d-a5e7-614e4e50dd2c" type="PROCESO:URIVACIO2"/>
-			</when>
-			<when expression='#[vars.errorReasonProceso=="Error en la capa de sistema"]'>
-				<raise-error doc:name="Raise error" doc:id="6110db72-2a74-490f-b4d9-11524d438a39" type="SYSTEMA:ERROR"/>
-			</when>
-			<when expression='#[vars.errorReasonProceso=="Error EN SISTEMA,INSERT"]'>
-				<raise-error doc:name="Raise error" doc:id="4680012a-463b-4318-8e2c-cd62ae6ce4d8" type="SYSTEMA:ERRORDB"/>
-			</when>
-			<otherwise >
-				<logger level="INFO" doc:name="Logger" doc:id="65a620fe-e18b-456d-a319-528d11e8c5fe" message="to bien"/>
-			</otherwise>
-		</choice>
 	</flow>
 </mule>

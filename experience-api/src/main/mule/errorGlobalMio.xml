@@ -5,45 +5,23 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
 http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
 	<error-handler name="errorGlobalMioError_Handler" doc:id="88a9147c-83bc-488b-9c54-6ac538fdc991" >
-		<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="4d426584-633d-4757-ac49-76290921604a" type="BANEOS:POKEMON">
-			<ee:transform doc:name="Transform Message" doc:id="eededbc6-1edb-4fad-9966-aff5f87ae455" >
+		<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="333a04cb-64f3-41ef-856d-f97cb2f4f7b0" type="HTTP:INTERNAL_SERVER_ERROR">
+			<ee:transform doc:name="Transform Message" doc:id="6bd6688b-fe02-4f8a-8172-24ec42f5463a" >
 				<ee:message >
 					<ee:set-payload ><![CDATA[%dw 2.0
-output application/JSON
+output application/java
 ---
-
-"nO SE PERMITE ESE POKEMON. INTENTE CON OTRO"]]></ee:set-payload>
-				</ee:message>
-			</ee:transform>
-		</on-error-propagate>
-		<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="a2e66cf8-21ce-45b6-aa74-039509ea159e" type="PROCESO:URIVACIO2">
-			<logger level="INFO" doc:name="Logger" doc:id="a075e5d3-9a05-4737-9df6-150ecb301691" message="SE LANZO ERROR URI VACIO"/>
-			<ee:transform doc:name="Transform Message" doc:id="6f4c17a1-511e-4b18-add8-9e197cf5137a" >
-				<ee:message >
-					<ee:set-payload ><![CDATA[%dw 2.0
-output application/json
----
-{"OCURRIO UN ERROR":"pokemon vacio"}]]></ee:set-payload>
-				</ee:message>
-			</ee:transform>
-		</on-error-propagate>
-		<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="580f6b60-d409-4a76-aeab-10be84e0166d" type="SYSTEMA:ERROR">
-			<ee:transform doc:name="Transform Message" doc:id="9277a79f-4c73-4812-a488-40d38842b4d9" >
-				<ee:message >
-					<ee:set-payload ><![CDATA[%dw 2.0
-output application/JSON
----
-"ERROR DE SISTEMA, PUEDE QUE NO EXISTA EL POKEMON"]]></ee:set-payload>
-				</ee:message>
-			</ee:transform>
-		</on-error-propagate>
-		<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="040b9228-0d74-4caf-9dfe-9e40763c8516" type="SYSTEMA:ERRORDB">
-			<ee:transform doc:name="Transform Message" doc:id="1d1b30b4-ddbb-4cd2-a14c-51b793bf656f" >
-				<ee:message >
-					<ee:set-payload ><![CDATA[%dw 2.0
-output application/JSON
----
-"ERROR EN SISTEMA, PUEDE QUE EL POKEMON YA SE HAYA REGISTRADO"]]></ee:set-payload>
+{
+	encabezado: {
+		mensaje: "ERROR EN SERVIDOR",
+		operacion: false,
+		capa: "xp"
+	},
+	contenido: {
+		tipo: error.errorType,
+		descripcion: error.description
+	}
+}]]></ee:set-payload>
 				</ee:message>
 			</ee:transform>
 		</on-error-propagate>
